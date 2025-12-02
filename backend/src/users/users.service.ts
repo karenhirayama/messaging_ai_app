@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import bcrypt from 'node_modules/bcryptjs';
 
 import { PgService } from 'src/database/database.service';
+
 import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
@@ -40,5 +41,29 @@ export class UsersService {
         const result = await this.pgService.query(query, [email, hashedPassword, nickname]);
         
         return result.rows[0];
+    }
+
+    async updateProfile(newNickname: string, userId: string, oldPassword: string, newPassword: string): Promise<any> {
+        const user = await this.findOneByEmail(userId);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const isPasswordValid = await this.comparePassword(oldPassword, user.password);
+        if (!isPasswordValid) {
+            throw new Error('Invalid password');
+        }
+
+        const hashedNewPassword = await this.hashPassword(newPassword);
+
+        const query = 'UPDATE users SET nickname = $1, password = $2 WHERE id = $3 RETURNING id, email, nickname';
+        const result = await this.pgService.query(query, [newNickname, hashedNewPassword, userId]);
+
+        return result.rows[0];
+    }
+
+    async deleteUser(userId: string): Promise<void> {
+        const query = 'DELETE FROM users WHERE id = $1';
+        await this.pgService.query(query, [userId]);
     }
 }
