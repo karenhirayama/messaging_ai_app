@@ -1,0 +1,419 @@
+{
+	"info": {
+		"_postman_id": "eb66be15-a23b-476e-8816-35d8c5afbfb1",
+		"name": "Messaging AI App (NestJS Backend) - Complete",
+		"description": "Complete Postman Collection for the NestJS Messaging AI Application, covering Auth, Friendship, Chat, and AI modules. Follow the requests in order.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "35980215",
+		"_collection_link": "https://gold-rocket-548548.postman.co/workspace/messaging_ai_app~4abeaaf0-1587-4015-85fc-3cdd4862ffc9/collection/35980215-eb66be15-a23b-476e-8816-35d8c5afbfb1?action=share&source=collection_link&creator=35980215"
+	},
+	"item": [
+		{
+			"name": "1. Setup & Auth",
+			"item": [
+				{
+					"name": "1.1 Register User A (The Main User)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuserA\",\n    \"password\": \"password\",\n    \"email\": \"userA@example.com\",\n    \"nickname\": \"{{userA_Nickname}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Register User B (Friend: Fred)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"testuserB\",\n    \"password\": \"password\",\n    \"email\": \"userB@example.com\",\n    \"nickname\": \"{{userB_Nickname}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 Login User A & Save Token (Current User)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Status code is 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var response = pm.response.json();",
+									"if (response && response.access_token) {",
+									"    pm.collectionVariables.set('jwtToken', response.access_token);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"userA@example.com\",\n    \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Friendship Flow",
+			"item": [
+				{
+					"name": "2.1 User A: Send Request to Fred",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = pm.response.json();",
+									"if (response && response.id) {",
+									"    pm.collectionVariables.set('friendshipId', response.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nickname\": \"{{userB_Nickname}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/friendship/request",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"friendship",
+								"request"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.2 Login User B (Friend) - MANUAL STEP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"userB@example.com\",\n    \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 User B: Accept Request (Creates Conversation)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/friendship/accept/{{friendshipId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"friendship",
+								"accept",
+								"{{friendshipId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.4 User B: Get Friends List (Save Conversation ID)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = pm.response.json();",
+									"if (response && response.length > 0 && response[0].conversation_id) {",
+									"    pm.collectionVariables.set('conversationId', response[0].conversation_id);",
+									"    pm.collectionVariables.set('friendshipId', response[0].friendship_id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/friendship/list",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"friendship",
+								"list"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Chat & AI Interaction (Requires User B Token)",
+			"item": [
+				{
+					"name": "3.0 Create conversation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"friendshipId\": \"{{friendshipId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/chat/conversation",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chat",
+								"conversation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.1 Send Regular Message (User B)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"conversationId\": \"{{conversationId}}\",\n    \"receiverId\": \"{{friendId}}\",\n    \"content\": \"Hi User A! This is Fred. I accepted your request.\",\n    \"isAiResponse\": false\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/chat/message",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chat",
+								"message"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.2 Get Conversation History (User B)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/chat/history/{{conversationId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"chat",
+								"history",
+								"{{conversationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.3 Submit AI Prompt (@Lari, Context Test)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwtToken}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"conversationId\": \"{{conversationId}}\",\n    \"prompt\": \"@Lari, summarize the content of the conversation so far.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ai/prompt",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ai",
+								"prompt"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "jwtToken",
+			"value": "",
+			"type": "string",
+			"description": "Token for the currently logged-in user (starts with User A)"
+		},
+		{
+			"key": "userA_Nickname",
+			"value": "userA",
+			"type": "string"
+		},
+		{
+			"key": "userB_Nickname",
+			"value": "Fred",
+			"type": "string",
+			"description": "Friend's nickname"
+		},
+		{
+			"key": "friendshipId",
+			"value": "",
+			"type": "string",
+			"description": "ID of the friendship record"
+		},
+		{
+			"key": "conversationId",
+			"value": "",
+			"type": "string",
+			"description": "ID used for messaging/chat history"
+		},
+		{
+			"key": "friendId",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
