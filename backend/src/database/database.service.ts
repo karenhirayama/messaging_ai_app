@@ -12,9 +12,9 @@ export class PgService implements OnModuleInit, OnModuleDestroy {
     this.pool = new Pool({
       host: this.configService.get<string>('DB_HOST'),
       port: this.configService.get<number>('DB_PORT'),
-      user: this.configService.get<string>('DB_USER'),
+      user: this.configService.get<string>('DB_USERNAME'),
       password: this.configService.get<string>('DB_PASSWORD'),
-      database: this.configService.get<string>('DB_NAME'),
+      database: this.configService.get<string>('DB_DATABASE'),
     });
 
     await this.pool
