@@ -1,8 +1,17 @@
-import { Body, Controller, Get, Param, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { Request as ExpressRequest } from 'express';
 
 import { ChatService } from './chat.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ChatGateway } from './chat.gateway';
 
 interface SaveMessageDto {
   conversationId: string;
@@ -14,11 +23,16 @@ interface SaveMessageDto {
 @UseGuards(JwtAuthGuard)
 @Controller('chat')
 export class ChatController {
-  constructor(private chatService: ChatService) {}
+  constructor(
+    private chatService: ChatService,
+    private chatGateway: ChatGateway,
+  ) {}
 
   @Post('conversation')
   async createConversation(@Body('friendshipId') friendshipId: string) {
-    const conversation = await this.chatService.createConversation(friendshipId);
+    const conversation =
+      await this.chatService.createConversation(friendshipId);
+
     return { conversation };
   }
 
@@ -37,7 +51,19 @@ export class ChatController {
       isAiResponse,
       receiverId,
     );
-    return { message };
+
+    const messageForBroadcast = {
+      ...message,
+      senderId,
+      isAiResponse,
+    };
+
+    this.chatGateway.broadcastToConversation(
+      conversationId,
+      messageForBroadcast,
+    );
+
+    return { message: messageForBroadcast };
   }
 
   @Get('history/:conversationId')
@@ -52,5 +78,15 @@ export class ChatController {
       userId,
     );
     return { history };
+  }
+
+  @Get('conversations')
+  async getConversations(@Request() req: ExpressRequest & { user?: any }) {
+    const userId = req.user.userId;
+
+    const conversations =
+      await this.chatService.getConversationsForUser(userId);
+
+    return { data: conversations };
   }
 }

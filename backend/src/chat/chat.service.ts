@@ -1,4 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+} from '@nestjs/common';
 
 import { PgService } from 'src/database/database.service';
 
@@ -27,16 +30,13 @@ export class ChatService {
 
   async createConversation(friendshipId: string) {
     const friendshipResult = await this.pgService.query(
-      `SELECT id FROM friendships 
-            WHERE id = $1
-              AND status = 'accepted'`,
+      `SELECT user_id, friend_id FROM friendships 
+       WHERE id = $1 AND status = 'accepted'`,
       [friendshipId],
     );
 
     if (friendshipResult.rows.length === 0) {
-      throw new BadRequestException(
-        'No accepted friendship found between the users',
-      );
+      throw new BadRequestException('No accepted friendship found');
     }
 
     const conversationResult = await this.pgService.query(
@@ -44,15 +44,38 @@ export class ChatService {
       [friendshipId],
     );
 
-    return conversationResult.rows[0];
+    const conversation = conversationResult.rows[0];
+
+    const { user_id, friend_id } = friendshipResult.rows[0];
+    
+    await this.pgService.query(
+      `INSERT INTO conversation_participants (conversation_id, user_id) 
+       VALUES ($1, $2), ($1, $3)`,
+      [conversation.id, user_id, friend_id]
+    );
+
+    return conversation;
+  }
+
+  async createAiConversation(userId: string, aiUserId: string) {
+    const convResult = await this.pgService.query(
+      `INSERT INTO conversations (is_ai_chat) VALUES (TRUE) RETURNING id`,
+    );
+    const conversationId = convResult.rows[0].id;
+
+    await this.pgService.query(
+      `INSERT INTO conversation_participants (conversation_id, user_id) 
+       VALUES ($1, $2), ($1, $3)`,
+      [conversationId, userId, aiUserId],
+    );
+
+    return { id: conversationId };
   }
 
   async getConversationHistory(conversationId: string, userId: string) {
     const validationResult = await this.pgService.query(
-      `SELECT c.id
-            FROM conversations c
-            JOIN friendships f ON c.friendship_id = f.id
-            WHERE c.id = $1 AND (f.user_id = $2 OR f.friend_id = $2)`,
+      `SELECT 1 FROM conversation_participants 
+       WHERE conversation_id = $1 AND user_id = $2`,
       [conversationId, userId],
     );
 
@@ -61,14 +84,59 @@ export class ChatService {
     }
 
     const messagesResult = await this.pgService.query(
-      `SELECT m.id, m.sender_id, m.content, m.is_ai_response, m.created_at, u.nickname AS sender_nickname
-            FROM messages m
-            JOIN users u ON u.id = m.sender_id
-            WHERE m.conversation_id = $1
-            ORDER BY m.created_at ASC`,
+      `SELECT 
+         m.id,
+         m.sender_id,
+         m.content,
+         m.is_ai_response,
+         m.created_at,
+         u.nickname AS sender_nickname
+       FROM messages m
+       JOIN users u ON u.id = m.sender_id
+       WHERE m.conversation_id = $1
+       ORDER BY m.created_at ASC`,
       [conversationId],
     );
 
     return messagesResult.rows;
+  }
+
+  async getConversationsForUser(userId: string) {
+    const query = `
+      SELECT DISTINCT ON (c.id)
+        c.id AS conversation_id,
+        c.is_ai_chat,
+        CASE
+          WHEN c.is_ai_chat THEN 'Lari'
+          ELSE (
+            SELECT u2.nickname 
+            FROM conversation_participants cp2
+            JOIN users u2 ON u2.id = cp2.user_id
+            WHERE cp2.conversation_id = c.id 
+              AND cp2.user_id != $1
+            LIMIT 1
+          )
+        END AS participant_nickname,
+        (
+          SELECT m.content
+          FROM messages m
+          WHERE m.conversation_id = c.id
+          ORDER BY m.created_at DESC
+          LIMIT 1
+        ) AS last_message_content,
+        (
+          SELECT m.created_at
+          FROM messages m
+          WHERE m.conversation_id = c.id
+          ORDER BY m.created_at DESC
+          LIMIT 1
+        ) AS last_message_time
+      FROM conversations c
+      JOIN conversation_participants cp ON c.id = cp.conversation_id
+      WHERE cp.user_id = $1
+      ORDER BY c.id, last_message_time DESC NULLS LAST`;
+
+    const result = await this.pgService.query(query, [userId]);
+    return result.rows;
   }
 }
