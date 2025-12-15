@@ -7,6 +7,7 @@ import {
   Request,
   Get,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { Request as ExpressRequest } from 'express';
 
@@ -15,12 +16,15 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { ChatService } from 'src/chat/chat.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private usersService: UsersService,
     private authService: AuthService,
+    private chatService: ChatService,
+    private configService: ConfigService,
   ) {}
 
   @Post('signup')
@@ -42,6 +46,23 @@ export class AuthController {
     }
 
     const newUser = await this.usersService.createUser(createUserDto);
+
+    const lariUserId = this.configService.get('LARI_USER_ID');
+
+    if (lariUserId) {
+      const conversation = await this.chatService.createAiConversation(
+        newUser.id,
+        lariUserId,
+      );
+
+      await this.chatService.saveMessage(
+        lariUserId,
+        conversation.id,
+        `Hello, ${newUser.nickname}! Welcome to the app. I'm Lari, your personal AI assistant. How can I help you get started?`,
+        true,
+        newUser.id,
+      );
+    }
 
     delete newUser.password;
 
