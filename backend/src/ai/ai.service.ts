@@ -19,33 +19,11 @@ export class AiService {
     });
   }
 
-  async generateContent(prompt: string): Promise<string> {
-    try {
-      const response = await this.ai.models.generateContent({
-        model: this.model,
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: prompt }],
-          },
-        ],
-      });
-
-      if (!response.text) {
-        throw new Error('AI generation returned no text or was blocked.');
-      }
-
-      return response.text;
-    } catch (error) {
-      console.error('Error generating content:', error);
-      throw new Error(`Failed to generate content: ${error.message}`);
-    }
-  }
-
   async generateAiResponse(
     userId: string,
     conversationId: string,
     prompt: string,
+    
   ) {
     const clientMessage = prompt.replace('@Lari', '').trim();
 
@@ -54,14 +32,16 @@ export class AiService {
       userId,
     );
 
-    let contextHistory = history.map((message) => ({
-      role: message.sender_id === userId ? 'user' : 'assistant',
+    let contextHistory = history.map((message) => {
+      const contentText = message.is_ai_response ? message.content : `${message.sender_nickname}: ${message.content}`
+      return ({
+      role: message.is_ai_response ? 'model' : 'user',
       parts: [
         {
-          text: `${message.sender_nickname || 'Friend'}: ${message.content}`,
+          text: contentText,
         },
       ],
-    }));
+    })});
 
     contextHistory.push({
       role: 'user',
@@ -90,34 +70,10 @@ export class AiService {
         const fallbackText =
           "Apologies, I couldn't generate a response right now. The model might have encountered an issue or the content was blocked.";
 
-        await this.chatService.saveMessage(
-          userId,
-          conversationId,
-          prompt,
-          false,
-        );
-
-        await this.chatService.saveMessage(
-          userId,
-          conversationId,
-          fallbackText,
-          true,
-        );
-
-        return {
-          text: fallbackText,
-          warning: 'AI response generation failed.',
-        };
+        return fallbackText;
       }
 
-      await this.chatService.saveMessage(userId, conversationId, aiText, true);
-
-      const newHistory = await this.chatService.getConversationHistory(
-        conversationId,
-        userId,
-      );
-
-      return newHistory;
+      return aiText;
     } catch (error) {
       console.error('Error generating content:', error);
       throw new Error('Failed to generate content');
