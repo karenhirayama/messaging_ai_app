@@ -32,10 +32,7 @@ export const useAddFriendModal = () => {
         await sendRequest(newFriendEmail).unwrap();
 
         setNewFriendEmail("");
-        console.log(`Successfully sent request to: ${newFriendEmail}`);
       } catch (error) {
-        console.error("Failed to send friend request:", error);
-        alert(`Failed to send request to ${newFriendEmail}.`);
       }
     } else {
       alert("Please enter a valid email address.");
@@ -46,10 +43,7 @@ export const useAddFriendModal = () => {
     try {
       await acceptRequest(friendshipId).unwrap();
 
-      console.log(`Accepted request from: ${email}`);
     } catch (error) {
-      console.error("Failed to accept friend request:", error);
-      alert(`Failed to accept request from ${email}.`);
     }
   };
 
@@ -62,9 +56,6 @@ export const useAddFriendModal = () => {
   const handleChangeActiveTab = (newTab: ActiveTabType) => {
     setActiveTab(newTab);
   };
-
-  console.log("receivedList", receivedList);
-  console.log("sentList", sentList);
 
   return {
     activeTab,

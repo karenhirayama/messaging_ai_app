@@ -1,7 +1,8 @@
 import { Mail, UserPlus, Users, Lock, LockKeyhole } from "lucide-react";
 
-import { useSignup } from "../../hooks/useSignup";
 import FormInput from "../../components/FormInput";
+
+import { useSignup } from "../../hooks/useSignup";
 
 const SignUp = () => {
   const { signupForm, onFormChange, onLogin, onSignupSubmit } = useSignup();
@@ -52,7 +53,10 @@ const SignUp = () => {
           required
         />
       </form>
-      <button onClick={onSignupSubmit} className="w-full p-4 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-700 transition-colors shadow-md flex items-center justify-center disabled:bg-indigo-400 disabled:cursor-not-allowed">
+      <button
+        onClick={onSignupSubmit}
+        className="w-full p-4 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-700 transition-colors shadow-md flex items-center justify-center disabled:bg-indigo-400 disabled:cursor-not-allowed"
+      >
         Sign In
       </button>
       <div className="mt-8 pt-6 border-t border-gray-100 text-center">

@@ -51,8 +51,6 @@ const FriendList = ({ friends, onCreateNewChat }: FriendListProps) => {
     );
   }
 
-  console.log('friends', friends)
-
   return (
     <div className="mt-6">
       <h3 className="mb-3 text-lg font-medium text-white">Your Friends:</h3>

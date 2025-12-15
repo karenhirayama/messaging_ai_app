@@ -45,8 +45,6 @@ interface ConversationListProps {
     </div>;
   }
 
-  console.log('conversations', conversations)
-
   return (
     <div
       className={`flex-1 flex flex-col ${isSidebarOpen ? "block" : "hidden"}`}

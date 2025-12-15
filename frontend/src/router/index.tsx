@@ -1,4 +1,4 @@
-import { createBrowserRouter, redirect } from "react-router-dom"; // 1. Import 'redirect'
+import { createBrowserRouter, redirect } from "react-router-dom"; 
 
 import Home from "../pages/Home";
 import Login from "../pages/Login";
@@ -28,15 +28,16 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
-    loader: protectedLoader,
     children: [
       {
         index: true,
         element: <Home />,
+        loader: protectedLoader,
       },
       {
         path: "conversation/:conversationId",
         element: <Conversation />,
+        loader: protectedLoader,
       },
       {
         path: "login",

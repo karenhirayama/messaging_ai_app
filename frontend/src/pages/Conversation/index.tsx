@@ -1,28 +1,25 @@
 import { SendIcon } from "lucide-react";
-import { useParams } from "react-router-dom"; // 1. Import useParams to get the ID
+import { useParams } from "react-router-dom";
 
 import MessageBox from "../../components/MessageBox";
 
 import { useChat } from "../../hooks/useChat";
-import { useConversations } from "../../hooks/useConversations"; // To get receiver ID
+import { useConversations } from "../../hooks/useConversations";
 
 import { useAppSelector } from "../../store/hooks";
 
 const Conversation = () => {
-  const { conversationId } = useParams<{ conversationId: string }>(); // 2. Get the ID from the URL
+  const { conversationId } = useParams<{ conversationId: string }>();
   const { conversations } = useConversations();
   const currentUserId = useAppSelector((state) => state.auth.user?.sub) ?? null;
 
-  // 3. Find the active conversation details
   const activeConversation = conversations.find(
-    (conv) => conv.conversation_id === conversationId
+    (conversation) => conversation.conversation_id === conversationId
   );
 
-  // You need the receiverId for sending messages via socket
-  const activeReceiverId =  null;
-  const participantNickname = activeConversation?.participant_nickname ?? "User";
+  const activeReceiverId =  activeConversation?.participant_id ?? null;
+  const participantNickname = activeConversation?.participant_nickname ?? "";
 
-  // 4. Pass the dynamic IDs to useChat hook
   const {
     inputMessage,
     setInputMessage,
@@ -69,6 +66,7 @@ const Conversation = () => {
           messages.map((message) => (
             <MessageBox
               key={message.id}
+              id={message.id}
               isUser={message.sender_id === currentUserId}
               isAI={message.is_ai_response}
               sender_nickname={message.sender_nickname}

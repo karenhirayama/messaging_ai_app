@@ -17,10 +17,9 @@ const Home = () => {
   const lariConversation =
     conversations.find((conv) => conv.participant_nickname === LARI_NICKNAME) ||
     conversations[0];
-  console.log("lariConversation", lariConversation);
 
   const activeConversationId = lariConversation?.conversation_id ?? null;
-  console.log("activeConversationId", activeConversationId);
+
   const activeReceiverId = LARI_RECEIVER_ID;
 
   const {
@@ -67,8 +66,6 @@ const Home = () => {
     );
   }
 
-  console.log("messages", messages);
-
   return (
     <div className="flex flex-col max-w-3xl mx-auto h-[80vh]">
       <div className="flex flex-col gap-4 flex-1 p-6 space-y-5 overflow-y-auto">
@@ -80,6 +77,7 @@ const Home = () => {
           messages.map((message) => (
             <MessageBox
               key={message.id}
+              id={message.id}
               isUser={message.sender_id === currentUserId}
               isAI={message.is_ai_response}
               sender_nickname={message.sender_nickname}

@@ -5,7 +5,7 @@ interface SessionExpiredModalProps {
   onClose: () => void;
 }
 
-export default function SessionExpiredModal({ isOpen, onClose }: SessionExpiredModalProps) {
+const SessionExpiredModal = ({ isOpen, onClose }: SessionExpiredModalProps) => {
   const navigate = useNavigate();
 
   if (!isOpen) return null;
@@ -51,3 +51,5 @@ export default function SessionExpiredModal({ isOpen, onClose }: SessionExpiredM
     </div>
   );
 }
+
+export default SessionExpiredModal;

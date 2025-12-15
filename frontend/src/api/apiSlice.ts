@@ -5,7 +5,6 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const getAuthToken = () => localStorage.getItem('accessToken');
 
-// Event to notify about session expiration
 export const sessionExpiredEvent = new EventTarget();
 
 const baseQueryWithAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extraOptions) => {
@@ -22,9 +21,7 @@ const baseQueryWithAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQuery
 
   const result = await baseQuery(args, api, extraOptions);
 
-  // Check if we got a 401 Unauthorized response
   if (result.error && result.error.status === 401) {
-    // Dispatch a custom event to notify the app about session expiration
     sessionExpiredEvent.dispatchEvent(new Event('sessionExpired'));
   }
 

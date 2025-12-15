@@ -2,12 +2,14 @@ import { BotMessageSquare, UserRound } from "lucide-react";
 import { useMemo } from "react";
 
 interface MessageBoxProps {
+  id: string;
   text: string;
   isAI?: boolean;
   isUser?: boolean;
   sender_nickname: string;
 }
 const MessageBox = ({
+  id,
   text,
   isAI = false,
   isUser = false,
@@ -34,12 +36,13 @@ const MessageBox = ({
   }, [isAI, isUser]);
 
   return (
-    <div className={`flex ${alignmentClass}`}>
+    <div id={id} className={`flex ${alignmentClass}`}>
       <div
         className={`flex flex-col rounded-md border border-slate-600 p-2 gap-2 max-w-xs md:max-w-md ${bgColorClass}`}
       >
-        {!isUser ? (
-          <SenderInfo isAI={isAI} sender_nickname={sender_nickname} />
+        {isAI ? <AISenderInfo /> : null}
+        {!isUser && !isAI ? (
+          <SenderInfo sender_nickname={sender_nickname} />
         ) : null}
         <div>{text}</div>
         {isAI ? (
@@ -58,21 +61,20 @@ const MessageBox = ({
   );
 };
 
+const AISenderInfo = () => {
+  return (
+    <div className="flex items-center gap-2">
+      <BotMessageSquare size="14px" />
+      <span className="font-semibold text-sm">Lari</span>
+    </div>
+  );
+};
+
 interface SenderInfoProps {
-  isAI: boolean;
   sender_nickname: string;
 }
 
-const SenderInfo = ({ isAI, sender_nickname }: SenderInfoProps) => {
-  if (isAI) {
-    return (
-      <div className="flex items-center gap-2">
-        <BotMessageSquare size="14px" />
-        <span className="font-semibold text-sm">Lari</span>
-      </div>
-    );
-  }
-
+const SenderInfo = ({ sender_nickname }: SenderInfoProps) => {
   return (
     <div className="flex items-center gap-2">
       <UserRound size="14px" />

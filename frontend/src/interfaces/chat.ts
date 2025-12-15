@@ -2,6 +2,7 @@ export interface Conversation {
   conversation_id: string;
   is_ai_chat: boolean;
   participant_nickname: string;
+  participant_id: string;
   last_message_content: string;
   last_message_time: Date;
 }

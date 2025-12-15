@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
+
 import { useAppSelector } from "../store/hooks";
+
 import { useGetConversationHistoryQuery } from "../features/chat/chatApi";
 
 const SOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL || "";
@@ -19,16 +21,22 @@ export const useChat = (
   const currentUserId = useAppSelector((state) => state.auth.user?.sub) ?? null;
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
-  const { data: historyData, isLoading: isLoadingHistory } =
-    useGetConversationHistoryQuery(conversationId, {
-      skip: !conversationId,
-    });
+  const {
+    data: historyData,
+    isLoading: isLoadingHistory,
+  } = useGetConversationHistoryQuery(conversationId, {
+    skip: !conversationId,
+  });
 
   useEffect(() => {
     if (historyData?.history) {
       setMessages(historyData.history);
     }
   }, [historyData]);
+
+  useEffect(() => {
+    setInputMessage("");
+  }, [conversationId]);
 
   useEffect(() => {
     if (!isAuthenticated || !currentUserId || !conversationId) {
