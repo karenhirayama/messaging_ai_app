@@ -12,20 +12,20 @@ import { FriendshipStatus } from './friendship.constants';
 export class FriendshipService {
   constructor(private readonly pgService: PgService) {}
 
-  private async findUserByNickname(nickname: string) {
+  private async findUserByEmail(email: string) {
     const result = await this.pgService.query(
-      'SELECT id FROM users WHERE nickname = $1',
-      [nickname],
+      'SELECT id FROM users WHERE email = $1',
+      [email],
     );
 
     return result.rows[0];
   }
 
-  async sendFriendRequest(senderId: string, receiverNickname: string) {
-    const receiver = await this.findUserByNickname(receiverNickname);
+  async sendFriendRequest(senderId: string, receiverEmail: string) {
+    const receiver = await this.findUserByEmail(receiverEmail);
     if (!receiver) {
       throw new NotFoundException(
-        `User with nickname ${receiverNickname} not found`,
+        `User with email ${receiverEmail} not found`,
       );
     }
 
@@ -48,8 +48,6 @@ export class FriendshipService {
       'INSERT INTO friendships (user_id, friend_id, status) VALUES ($1, $2, $3)',
       [senderId, receiver.id, FriendshipStatus.PENDING],
     );
-
-    console.log('result', result);
 
     return result.rows[0];
   }
@@ -118,6 +116,38 @@ export class FriendshipService {
         WHERE f.status = $2 AND (f.user_id = $1 OR f.friend_id = $1)`,
         [userId, FriendshipStatus.ACCEPTED],
     )
+
+    return result.rows;
+  }
+
+async getRequestsReceived(userId: string) {
+    const result = await this.pgService.query(
+      `SELECT
+        f.id AS friendship_id,
+        u1.nickname AS nickname,
+        u1.email AS email
+      FROM friendships f
+      JOIN users u1 ON u1.id = f.user_id
+      WHERE f.status = $2 AND f.friend_id = $1 -- Key change: f.friend_id must be the current user ($1)
+      `,
+      [userId, FriendshipStatus.PENDING],
+    );
+
+    return result.rows;
+  }
+
+  async getRequestsSent(userId: string) {
+    const result = await this.pgService.query(
+      `SELECT
+        f.id AS friendship_id,
+        u2.nickname AS nickname,
+        u2.email AS email
+      FROM friendships f
+      JOIN users u2 ON u2.id = f.friend_id
+      WHERE f.status = $2 AND f.user_id = $1 -- Key condition: f.user_id must be the current user ($1)
+      `,
+      [userId, FriendshipStatus.PENDING],
+    );
 
     return result.rows;
   }
