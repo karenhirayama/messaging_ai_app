@@ -118,6 +118,14 @@ export class ChatService {
           )
         END AS participant_nickname,
         (
+          SELECT u2.id
+          FROM conversation_participants cp2
+          JOIN users u2 ON u2.id = cp2.user_id
+          WHERE cp2.conversation_id = c.id 
+            AND cp2.user_id != $1
+          LIMIT 1
+        ) AS participant_id,
+        (
           SELECT m.content
           FROM messages m
           WHERE m.conversation_id = c.id
