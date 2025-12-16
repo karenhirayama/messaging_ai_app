@@ -1,5 +1,6 @@
 import { BotMessageSquare, UserRound } from "lucide-react";
 import { useMemo } from "react";
+import ReactMarkdown from "react-markdown";
 
 interface MessageBoxProps {
   id: string;
@@ -44,7 +45,7 @@ const MessageBox = ({
         {!isUser && !isAI ? (
           <SenderInfo sender_nickname={sender_nickname} />
         ) : null}
-        <div>{text}</div>
+        <ReactMarkdown>{text}</ReactMarkdown>
         {isAI ? (
           <div className="flex p-2 bg-sky-900 rounded-md">
             <span className="text-xs">
