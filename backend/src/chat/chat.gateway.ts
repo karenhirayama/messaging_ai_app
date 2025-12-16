@@ -163,17 +163,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         receiverId,
       );
 
-      const messageWithSender = {
-        ...message,
-        senderId,
-        isAiResponse,
+      const messageForBroadcast = {
+        id: message.id,
+        sender_id: message.sender_id,
+        sender_nickname: client.user.nickname,
+        content: message.content,
+        is_ai_response: message.is_ai_response,
+        created_at: message.created_at,
       };
 
       this.server
         .to(`conversation:${conversationId}`)
-        .emit('receiveMessage', messageWithSender);
+        .emit('receiveMessage', messageForBroadcast);
 
-      client.emit('messageSent', messageWithSender);
+      client.emit('messageSent', messageForBroadcast);
 
       if (content.trim().startsWith('@Lari')) {
         const aiResponseContent = await this.aiService.generateAiResponse(
@@ -191,9 +194,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         );
 
         const aiMessageForBroadcast = {
-          ...aiMessage,
-          sender_id: receiverId,
-          isAiResponse: true,
+          id: aiMessage.id,
+          sender_id: aiMessage.sender_id,
+          sender_nickname: 'Lari',
+          content: aiMessage.content,
+          is_ai_response: aiMessage.is_ai_response,
+          created_at: aiMessage.created_at,
         };
 
         this.server

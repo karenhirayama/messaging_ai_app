@@ -25,6 +25,7 @@ export class ChatService {
       content,
       isAiResponse,
     ]);
+
     return result.rows[0];
   }
 

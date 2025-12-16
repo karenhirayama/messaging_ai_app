@@ -42,6 +42,7 @@ export class ChatController {
     @Request() req: ExpressRequest & { user?: any },
   ) {
     const senderId = req.user.userId;
+    const senderNickname = req.user.nickname;
     const { conversationId, content, isAiResponse, receiverId } = body;
 
     const message = await this.chatService.saveMessage(
@@ -53,15 +54,13 @@ export class ChatController {
     );
 
     const messageForBroadcast = {
-      ...message,
-      senderId,
-      isAiResponse,
+      id: message.id,
+      sender_id: message.sender_id,
+      sender_nickname: senderNickname,
+      content: message.content,
+      is_ai_response: message.is_ai_response,
+      created_at: message.created_at,
     };
-
-    this.chatGateway.broadcastToConversation(
-      conversationId,
-      messageForBroadcast,
-    );
 
     return { message: messageForBroadcast };
   }

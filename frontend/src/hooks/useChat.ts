@@ -30,6 +30,7 @@ export const useChat = (
 
   useEffect(() => {
     if (historyData?.history) {
+      console.log('historyData.history', historyData.history)
       setMessages(historyData.history);
     }
   }, [historyData]);
@@ -93,8 +94,14 @@ export const useChat = (
 
     socket.on("receiveMessage", (messageData) => {
       console.log("Message received via Socket.IO:", messageData);
+      console.log('messageData', messageData)
 
-      setMessages((prev) => [...prev, messageData]);
+      setMessages((prev) => {
+        if (prev.some(msg => msg.id === messageData.id)) {
+          return prev;
+        }
+        return [...prev, messageData];
+      });
     });
 
     socket.on("messageSent", (data) => {
