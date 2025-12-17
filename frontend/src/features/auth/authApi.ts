@@ -1,20 +1,20 @@
-import { setCredentials } from './authSlice';
+import { setCredentials } from "./authSlice";
 
-import { apiSlice } from '../../api/apiSlice';
+import { apiSlice } from "../../api/apiSlice";
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     signup: builder.mutation({
       query: (credentials) => ({
-        url: 'auth/signup',
-        method: 'POST',
+        url: "auth/signup",
+        method: "POST",
         body: credentials,
       }),
     }),
     login: builder.mutation({
       query: (credentials) => ({
-        url: 'auth/login',
-        method: 'POST',
+        url: "auth/login",
+        method: "POST",
         body: credentials,
       }),
 
@@ -26,7 +26,7 @@ export const authApi = apiSlice.injectEndpoints({
           console.error('Login failed:', error);
         }
       },
-      invalidatesTags: ['User'], 
+      invalidatesTags: ["User"],
     }),
   }),
 });

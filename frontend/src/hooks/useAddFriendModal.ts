@@ -10,7 +10,7 @@ import {
 type ActiveTabType = "requests_received" | "requests_sent";
 
 export const useAddFriendModal = () => {
-  const [sendRequest, { isLoading: isSending }] =
+  const [sendRequest, { isLoading: isSending, error: sendError }] =
     useSendFriendRequestMutation();
   const [acceptRequest, { isLoading: isAccepting }] =
     useAcceptFriendRequestMutation();
@@ -66,6 +66,7 @@ export const useAddFriendModal = () => {
     isReceivedListLoading,
     sentList,
     isSentListLoading,
+    sendError,
     onSendRequest: handleSendRequest,
     onAcceptRequest: handleAcceptRequest,
     onChangeNewFriendEmail: handleChangeNewFriendEmail,

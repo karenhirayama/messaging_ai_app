@@ -2,11 +2,14 @@ import { SendIcon } from "lucide-react";
 import { useParams } from "react-router-dom";
 
 import MessageBox from "../../components/MessageBox";
+import TypingIndicator from "../../components/TypingIndicator";
 
 import { useChat } from "../../hooks/useChat";
 import { useConversations } from "../../hooks/useConversations";
 
 import { useAppSelector } from "../../store/hooks";
+
+const LARI_NAME = import.meta.env.VITE_LARI_NICKNAME;
 
 const Conversation = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -17,7 +20,7 @@ const Conversation = () => {
     (conversation) => conversation.conversation_id === conversationId
   );
 
-  const activeReceiverId =  activeConversation?.participant_id ?? null;
+  const activeReceiverId = activeConversation?.participant_id ?? null;
   const participantNickname = activeConversation?.participant_nickname ?? "";
 
   const {
@@ -28,6 +31,7 @@ const Conversation = () => {
     handleKeyPress,
     handleUserMessageSubmit,
     isLoadingHistory,
+    isAiResponding,
   } = useChat(conversationId ?? null, activeReceiverId);
 
   const handleSubmit = () => {
@@ -63,16 +67,19 @@ const Conversation = () => {
             Start a new conversation with {participantNickname}!
           </div>
         ) : (
-          messages.map((message) => (
-            <MessageBox
-              key={message.id}
-              id={message.id}
-              isUser={message.sender_id === currentUserId}
-              isAI={message.is_ai_response}
-              sender_nickname={message.sender_nickname}
-              text={message.content}
-            />
-          ))
+          <>
+            {messages.map((message) => (
+              <MessageBox
+                key={message.id}
+                id={message.id}
+                isUser={message.sender_id === currentUserId}
+                isAI={message.is_ai_response}
+                sender_nickname={message.sender_nickname}
+                text={message.content}
+              />
+            ))}
+            {isAiResponding && <TypingIndicator name={LARI_NAME} />}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -98,5 +105,4 @@ const Conversation = () => {
   );
 };
 
-
-export default Conversation
+export default Conversation;

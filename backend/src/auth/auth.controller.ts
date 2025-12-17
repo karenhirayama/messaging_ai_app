@@ -29,6 +29,18 @@ export class AuthController {
 
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto) {
+    if (!createUserDto.email) {
+      throw new ConflictException('Missing email field');
+    }
+
+    if (!createUserDto.nickname) {
+      throw new ConflictException('Missing username field');
+    }
+
+    if (!createUserDto.password) {
+      throw new ConflictException('Missing password field');
+    }
+
     const existingEmail = await this.usersService.findOneByEmail(
       createUserDto.email,
     );
@@ -42,7 +54,7 @@ export class AuthController {
     );
 
     if (existingNickname) {
-      throw new ConflictException('User with this nickname already exists');
+      throw new ConflictException('User with this username already exists');
     }
 
     const newUser = await this.usersService.createUser(createUserDto);

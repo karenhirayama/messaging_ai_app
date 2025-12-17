@@ -3,9 +3,12 @@ import { Mail, UserPlus, Users, Lock, LockKeyhole } from "lucide-react";
 import FormInput from "../../components/FormInput";
 
 import { useSignup } from "../../hooks/useSignup";
+import { isApiError } from "../../utils/error";
 
 const SignUp = () => {
-  const { signupForm, onFormChange, onLogin, onSignupSubmit } = useSignup();
+  const { signupForm, error, onFormChange, onLogin, onSignupSubmit } =
+    useSignup();
+
   return (
     <div className="flex flex-col gap-4 w-full max-w-md mx-auto p-6 bg-white rounded-2xl shadow-2xl border border-indigo-100/50">
       <div className="flex items-center mb-8 border-b pb-4">
@@ -22,7 +25,6 @@ const SignUp = () => {
           onChange={onFormChange}
           placeholder="Email Address"
           icon={Mail}
-          message="Email already exist"
           required
         />
         <FormInput
@@ -53,6 +55,13 @@ const SignUp = () => {
           required
         />
       </form>
+      {isApiError(error) ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+          <span className="text-red-600 text-sm">
+            {error.data.message}
+          </span>
+        </div>
+      ) : null}
       <button
         onClick={onSignupSubmit}
         className="w-full p-4 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-700 transition-colors shadow-md flex items-center justify-center disabled:bg-indigo-400 disabled:cursor-not-allowed"

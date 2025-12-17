@@ -1,6 +1,7 @@
 import { Mail, UserPlus, X, Check, Clock } from "lucide-react";
 
 import { useAddFriendModal } from "../../hooks/useAddFriendModal";
+import { isApiError } from "../../utils/error";
 
 interface AddFriendModalProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
     receivedList,
     newFriendEmail,
     sentList,
+    sendError,
     onSendRequest,
     onAcceptRequest,
     onChangeNewFriendEmail,
@@ -61,6 +63,14 @@ const AddFriendModal = ({ isOpen, onClose }: AddFriendModalProps) => {
             <UserPlus size={18} /> Send
           </button>
         </form>
+        
+        {isApiError(sendError) ? (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 mt-3">
+            <span className="text-red-600 text-sm">
+              {sendError.data.message}
+            </span>
+          </div>
+        ) : null}
 
         <div className="mt-6">
           <div className="flex border-b border-slate-700">

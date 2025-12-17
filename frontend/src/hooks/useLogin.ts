@@ -8,8 +8,9 @@ import { useLoginMutation } from "../features/auth/authApi";
 export const useLogin = () => {
   const navigate = useNavigate();
 
-  const [loginForm, setLoginForm] = useState<LoginForm>(defaultLoginForm);
   const [login, { isLoading, error }] = useLoginMutation();
+
+  const [loginForm, setLoginForm] = useState<LoginForm>(defaultLoginForm);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

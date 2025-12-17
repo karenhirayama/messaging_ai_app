@@ -24,7 +24,6 @@ export const useSignup = () => {
     e.preventDefault();
     try {
       const data = {
-        username: signupForm.username,
         nickname: signupForm.username,
         email: signupForm.email,
         password: signupForm.password,

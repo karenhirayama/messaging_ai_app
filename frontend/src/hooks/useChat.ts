@@ -17,6 +17,7 @@ export const useChat = (
   const [messages, setMessages] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isSocketConnected, setIsSocketConnected] = useState(false);
+  const [isAiResponding, setIsAiResponding] = useState(false);
 
   const currentUserId = useAppSelector((state) => state.auth.user?.sub) ?? null;
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
@@ -96,6 +97,11 @@ export const useChat = (
       console.log("Message received via Socket.IO:", messageData);
       console.log('messageData', messageData)
 
+      // If AI response, hide loading
+      if (messageData.is_ai_response) {
+        setIsAiResponding(false);
+      }
+
       setMessages((prev) => {
         if (prev.some(msg => msg.id === messageData.id)) {
           return prev;
@@ -134,6 +140,12 @@ export const useChat = (
 
     if (!content || !conversationId || !receiverId || !currentUserId) return;
 
+    // Check if message is for AI
+    const isAiMessage = content.startsWith("@Lari");
+    if (isAiMessage) {
+      setIsAiResponding(true);
+    }
+
     const messagePayload = {
       conversationId,
       content: content,
@@ -170,5 +182,6 @@ export const useChat = (
     handleUserMessageSubmit,
     handleKeyPress,
     isLoadingHistory,
+    isAiResponding,
   };
 };
