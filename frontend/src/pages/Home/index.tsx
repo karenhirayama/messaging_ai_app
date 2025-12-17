@@ -6,6 +6,7 @@ import { useChat } from "../../hooks/useChat";
 import { useConversations } from "../../hooks/useConversations";
 
 import { useAppSelector } from "../../store/hooks";
+import { formatDateTime } from "../../utils/dateFormat";
 
 const LARI_NICKNAME = import.meta.env.VITE_LARI_NICKNAME || "";
 const LARI_RECEIVER_ID = import.meta.env.VITE_LARI_RECEIVER_ID || "";
@@ -82,6 +83,7 @@ const Home = () => {
               isAI={message.is_ai_response}
               sender_nickname={message.sender_nickname}
               text={message.content}
+              time={formatDateTime(message.created_at)}
             />
           ))
         )}

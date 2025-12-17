@@ -8,6 +8,7 @@ interface MessageBoxProps {
   isAI?: boolean;
   isUser?: boolean;
   sender_nickname: string;
+  time: string;
 }
 const MessageBox = ({
   id,
@@ -15,6 +16,7 @@ const MessageBox = ({
   isAI = false,
   isUser = false,
   sender_nickname,
+  time,
 }: MessageBoxProps) => {
   const alignmentClass = useMemo(() => {
     if (isAI) {
@@ -55,7 +57,7 @@ const MessageBox = ({
           </div>
         ) : null}
         <div className="flex justify-end">
-          <span className="text-sm">10:44</span>
+          <span className="text-sm">{time}</span>
         </div>
       </div>
     </div>
