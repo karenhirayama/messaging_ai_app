@@ -1,14 +1,25 @@
 import { useState } from "react";
-import { Menu, MessageCirclePlus, UserRoundPlus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+import {
+  BotMessageSquare,
+  Menu,
+  MessageCirclePlus,
+  UserRoundPlus,
+} from "lucide-react";
 
 import ConversationList from "../ConversationList";
 import NewChatModal from "../NewChatModal";
 import AddFriendModal from "../AddFriendModal";
 
 import { useConversations } from "../../hooks/useConversations";
+import { useCreateAiConversationMutation } from "../../features/chat/chatApi";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+
   const { conversations, isLoadingConversations } = useConversations();
+  const [createAiConversation, { isLoading: isCreatingAiConversation }] = useCreateAiConversationMutation();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [openNewChatModal, setOpenNewChatModal] = useState(false);
@@ -35,6 +46,15 @@ const Sidebar = () => {
   const handleCloseAddFriendModal = () => {
     setOpenAddFriendModal(false);
   };
+
+  const handleAIChat = async () => {
+    try {
+      const result = await createAiConversation({}).unwrap();
+      navigate(`/conversation/${result.id}`);
+    } catch (error) {
+      console.error("Failed to create AI conversation:", error);
+    }
+  }
 
   return (
     <nav
@@ -77,7 +97,24 @@ const Sidebar = () => {
                 isSidebarOpen ? "block" : "hidden"
               }`}
             >
-             Add Friend
+              Add Friend
+            </span>
+          </button>
+
+          <button
+            onClick={handleAIChat}
+            disabled={isCreatingAiConversation}
+            className="hover:bg-slate-950 w-full p-3 rounded-full flex items-center gap-2"
+          >
+            <span>
+              <BotMessageSquare />
+            </span>
+            <span
+              className={`block truncate whitespace-nowrap ${
+                isSidebarOpen ? "block" : "hidden"
+              }`}
+            >
+              New Lari Chat
             </span>
           </button>
         </div>

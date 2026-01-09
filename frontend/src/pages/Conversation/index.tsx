@@ -1,46 +1,30 @@
 import { SendIcon } from "lucide-react";
-import { useParams } from "react-router-dom";
 
 import MessageBox from "../../components/MessageBox";
 import TypingIndicator from "../../components/TypingIndicator";
 
-import { useChat } from "../../hooks/useChat";
-import { useConversations } from "../../hooks/useConversations";
-
-import { useAppSelector } from "../../store/hooks";
 import { formatDateTime } from "../../utils/dateFormat";
+
+import { useConversation } from "../../hooks/useConversation";
+
 
 const LARI_NAME = import.meta.env.VITE_LARI_NICKNAME;
 
 const Conversation = () => {
-  const { conversationId } = useParams<{ conversationId: string }>();
-  const { conversations } = useConversations();
-  const currentUserId = useAppSelector((state) => state.auth.user?.sub) ?? null;
-
-  const activeConversation = conversations.find(
-    (conversation) => conversation.conversation_id === conversationId
-  );
-
-  const activeReceiverId = activeConversation?.participant_id ?? null;
-  const participantNickname = activeConversation?.participant_nickname ?? "";
-
   const {
+    conversationId,
+    activeConversation,
+    currentUserId,
     inputMessage,
-    setInputMessage,
     messages,
     messagesEndRef,
-    handleKeyPress,
-    handleUserMessageSubmit,
     isLoadingHistory,
     isAiResponding,
-  } = useChat(conversationId ?? null, activeReceiverId);
-
-  const handleSubmit = () => {
-    const content = inputMessage.trim();
-    if (!content) return;
-
-    handleUserMessageSubmit();
-  };
+    participantNickname,
+    setInputMessage,
+    onSubmit,
+    handleKeyPress,
+  } = useConversation();
 
   const isButtonDisabled = !inputMessage.trim() || isLoadingHistory;
 
@@ -96,7 +80,7 @@ const Conversation = () => {
           className="flex-1 p-3  focus:outline-none transition-shadow text-gray-700 "
         />
         <button
-          onClick={handleSubmit}
+          onClick={onSubmit}
           disabled={isButtonDisabled}
           className="p-4 bg-indigo-600 text-white rounded-full font-semibold hover:bg-indigo-700 transition-colors shadow-md flex items-center disabled:bg-indigo-700/50 disabled:cursor-not-allowed"
         >

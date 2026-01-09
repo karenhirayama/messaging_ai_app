@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS friendships (
 
 CREATE TABLE IF NOT EXISTS conversations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title VARCHAR(100) UNIQUE NOT NULL,
     friendship_id UUID REFERENCES friendships(id),
     is_ai_chat BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

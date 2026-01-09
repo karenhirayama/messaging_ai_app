@@ -107,12 +107,10 @@ export class FriendshipService {
         CASE
             WHEN f.user_id = $1 THEN u2.id
             ELSE u1.id
-        END AS friend_id,
-        c.id AS conversation_id
+        END AS friend_id
         FROM friendships f
         JOIN users u1 ON u1.id = f.user_id
         JOIN users u2 ON u2.id = f.friend_id
-        LEFT JOIN conversations c ON c.friendship_id = f.id
         WHERE f.status = $2 AND (f.user_id = $1 OR f.friend_id = $1)`,
         [userId, FriendshipStatus.ACCEPTED],
     )

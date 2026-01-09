@@ -47,9 +47,9 @@ interface ConversationListProps {
 
   return (
     <div
-      className={`flex-1 flex flex-col ${isSidebarOpen ? "block" : "hidden"}`}
+      className={`flex-1 flex flex-col max-h-[56vh] ${isSidebarOpen ? "block" : "hidden"}`}
     >
-      <ul className="space-y-2">
+      <ul className="space-y-2 overflow-y-auto">
         {conversations?.map((conversation: any) => (
           <li
             key={conversation.conversation_id}

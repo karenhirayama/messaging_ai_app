@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Request,
   UseGuards,
@@ -11,7 +12,6 @@ import { Request as ExpressRequest } from 'express';
 
 import { ChatService } from './chat.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { ChatGateway } from './chat.gateway';
 
 interface SaveMessageDto {
   conversationId: string;
@@ -25,7 +25,6 @@ interface SaveMessageDto {
 export class ChatController {
   constructor(
     private chatService: ChatService,
-    private chatGateway: ChatGateway,
   ) {}
 
   @Post('conversation')
@@ -87,5 +86,27 @@ export class ChatController {
       await this.chatService.getConversationsForUser(userId);
 
     return { data: conversations };
+  }
+
+  @Post('ai-conversation')
+  async createAiConversation(@Request() req: ExpressRequest & { user?: any }) {
+    const userId = req.user.userId;
+    const aiUserId = process.env.LARI_USER_ID;
+    
+    if (!aiUserId) {
+      throw new Error('LARI_USER_ID not configured');
+    }
+
+    return this.chatService.createAiConversation(userId, aiUserId);
+  }
+
+  @Patch('conversation/:id/title')
+  async updateConversationTitle(
+    @Param('id') conversationId: string,
+    @Body('title') title: string,
+    @Request() req: ExpressRequest & { user?: any },
+  ) {
+    const userId = req.user.userId;
+    return this.chatService.updateConversationTitle(conversationId, userId, title);
   }
 }

@@ -40,14 +40,21 @@ export class ChatService {
       throw new BadRequestException('No accepted friendship found');
     }
 
+    const { user_id, friend_id } = friendshipResult.rows[0];
+
+    const friendNicknameResult = await this.pgService.query(
+      `SELECT nickname FROM users WHERE id = $1`,
+      [friend_id]
+    );
+
+    const title = `${friendNicknameResult.rows[0].nickname} - ${new Date().toLocaleDateString()}`;
+
     const conversationResult = await this.pgService.query(
-      `INSERT INTO conversations (friendship_id) VALUES ($1) RETURNING *`,
-      [friendshipId],
+      `INSERT INTO conversations (friendship_id, title) VALUES ($1, $2) RETURNING *`,
+      [friendshipId, title],
     );
 
     const conversation = conversationResult.rows[0];
-
-    const { user_id, friend_id } = friendshipResult.rows[0];
     
     await this.pgService.query(
       `INSERT INTO conversation_participants (conversation_id, user_id) 
@@ -59,8 +66,11 @@ export class ChatService {
   }
 
   async createAiConversation(userId: string, aiUserId: string) {
+    const title = `Lari - ${new Date().toLocaleDateString()}`;
+
     const convResult = await this.pgService.query(
-      `INSERT INTO conversations (is_ai_chat) VALUES (TRUE) RETURNING id`,
+      `INSERT INTO conversations (is_ai_chat, title) VALUES (TRUE, $1) RETURNING id`,
+      [title],
     );
     const conversationId = convResult.rows[0].id;
 
@@ -70,7 +80,26 @@ export class ChatService {
       [conversationId, userId, aiUserId],
     );
 
-    return { id: conversationId };
+    return { id: conversationId, title };
+  }
+
+  async updateConversationTitle(conversationId: string, userId: string, newTitle: string) {
+    const validationResult = await this.pgService.query(
+      `SELECT 1 FROM conversation_participants 
+       WHERE conversation_id = $1 AND user_id = $2`,
+      [conversationId, userId],
+    );
+
+    if (validationResult.rows.length === 0) {
+      throw new BadRequestException('Conversation not found or access denied');
+    }
+
+    const result = await this.pgService.query(
+      `UPDATE conversations SET title = $1 WHERE id = $2 RETURNING *`,
+      [newTitle, conversationId],
+    );
+
+    return result.rows[0];
   }
 
   async getConversationHistory(conversationId: string, userId: string) {
@@ -107,6 +136,7 @@ export class ChatService {
       SELECT DISTINCT ON (c.id)
         c.id AS conversation_id,
         c.is_ai_chat,
+        c.title,
         CASE
           WHEN c.is_ai_chat THEN 'Lari'
           ELSE (

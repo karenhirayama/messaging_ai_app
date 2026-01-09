@@ -31,7 +31,6 @@ export const useChat = (
 
   useEffect(() => {
     if (historyData?.history) {
-      console.log('historyData.history', historyData.history)
       setMessages(historyData.history);
     }
   }, [historyData]);
@@ -95,9 +94,7 @@ export const useChat = (
 
     socket.on("receiveMessage", (messageData) => {
       console.log("Message received via Socket.IO:", messageData);
-      console.log('messageData', messageData)
 
-      // If AI response, hide loading
       if (messageData.is_ai_response) {
         setIsAiResponding(false);
       }

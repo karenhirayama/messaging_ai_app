@@ -8,7 +8,7 @@ interface NewChatModalProps {
 }
 
 const NewChatModal = ({ isOpen, onClose }: NewChatModalProps) => {
-  const { friends, onCreateNewChat } = useNewChatModal();
+  const { friends, onCreateNewChat } = useNewChatModal(onClose);
 
   if (!isOpen) return null;
 

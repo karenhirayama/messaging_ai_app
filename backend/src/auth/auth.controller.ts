@@ -70,7 +70,7 @@ export class AuthController {
       await this.chatService.saveMessage(
         lariUserId,
         conversation.id,
-        `Hello, ${newUser.nickname}! Welcome to the app. I'm Lari, your personal AI assistant. How can I help you get started?`,
+        `Hello, ${newUser.nickname}! Welcome to the app. I'm Lari, your personal AI assistant. To talk to me, start your message with @Lari. How can I help you get started?`,
         true,
         newUser.id,
       );

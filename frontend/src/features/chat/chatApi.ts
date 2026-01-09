@@ -12,6 +12,21 @@ export const chatApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Conversation"],
     }),
+    createAiConversation: builder.mutation({
+      query: () => ({
+        url: "chat/ai-conversation",
+        method: "POST",
+      }),
+      invalidatesTags: ["Conversation"],
+    }),
+    updateConversationTitle: builder.mutation({
+      query: ({ conversationId, title }) => ({
+        url: `chat/conversation/${conversationId}/title`,
+        method: "PATCH",
+        body: { title },
+      }),
+      invalidatesTags: ["Conversation"],
+    }),
     saveMessage: builder.mutation({
       query: (messageData) => ({
         url: "chat/message",
@@ -39,6 +54,8 @@ export const chatApi = apiSlice.injectEndpoints({
 
 export const {
   useCreateConversationMutation,
+  useCreateAiConversationMutation,
+  useUpdateConversationTitleMutation,
   useGetConversationHistoryQuery,
   useGenerateAiResponseMutation,
   useGetConversationsQuery,

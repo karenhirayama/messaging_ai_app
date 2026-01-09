@@ -71,9 +71,9 @@ const Home = () => {
     <div className="flex flex-col max-w-3xl mx-auto h-[80vh]">
       <div className="flex flex-col gap-4 flex-1 p-6 space-y-5 overflow-y-auto">
         {messages.length === 0 ? (
-          <div className="text-center text-gray-500 mt-10">
-            Start a new conversation with Lari!
-          </div>
+            <div className="text-center text-gray-500 mt-10">
+            No messages yet. Start a conversation with Lari by typing @Lari!
+            </div>
         ) : (
           messages.map((message) => (
             <MessageBox
